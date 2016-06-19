@@ -1,0 +1,27 @@
+{
+  "name": "wires-forever",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wiresjs/wires-forever.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wiresjs/wires-forever/issues"
+  },
+  "homepage": "https://github.com/wiresjs/wires-forever#readme",
+  "devDependencies": {
+    "express": "^4.14.0"
+  },
+  "dependencies": {
+    "log4js": "^0.6.37",
+    "mkdirp": "^0.5.1",
+    "moment": "^2.13.0"
+  }
+}
