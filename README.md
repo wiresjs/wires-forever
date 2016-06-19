@@ -7,7 +7,7 @@ I got fed up with manual work, and created a simple and automated script that ca
 ```js
 var Forever = require('wires-forever');
 
-Forever.daemon('app.js', {
+Forever.daemon(__dirname + '/app.js', {
    name: 'my-test',
    logs: __dirname + "/.logs/",
    env: {
