@@ -29,7 +29,6 @@ var rotateLogs = function(a, folder) {
    }
 }
 
-// forever start -o logs.text --uid test-app app.js
 var Forever = {
    path: 'forever',
    stop: function(name, cb) {
