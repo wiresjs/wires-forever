@@ -41,6 +41,7 @@ var Forever = {
       var spinSleepTime = opts.spinSleepTime || 5000;
       var minUptime = opts.minUptime || 5000;
       var env = opts.env || {};
+      var nodeVersion = opts.nodeVersion;
 
       var logsFolder = opts.logs || "/var/log/forever";
       var projectLogs = path.join(logsFolder, name);
@@ -68,9 +69,14 @@ var Forever = {
             '--spinSleepTime', spinSleepTime,
             '--minUptime', minUptime,
             '-l', logsFile,
-            '--uid', name,
-            file
+            '--uid', name
          ];
+         if (nodeVersion) {
+            data.push("-c");
+            data.push('"/usr/local/bin/n use ' + nodeVersion + '"');
+         }
+         data.push(file);
+
          var cmd = data.join(' ');
          logger.info("Launching...")
          logger.info(cmd);
