@@ -10,6 +10,7 @@ var Forever = require('wires-forever');
 Forever.daemon(__dirname + '/app.js', {
    name: 'my-test',
    port : 3000, // recommended
+   noveVersion : "0.12.0" // optional - "n" must be installed
    logs: __dirname + "/.logs/",
    env: {
       NODE_ENV: "production"
