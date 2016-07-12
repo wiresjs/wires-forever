@@ -1,0 +1,2 @@
+Like this bitch
+/usr/local/bin/n: line 498: 56337 Terminated: 15          $bin "$@"

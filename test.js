@@ -1,9 +1,12 @@
 var Forever = require('./index.js');
-Forever.daemon('app.js', {
+Forever.daemon(__dirname + '/app.js', {
    name: 'my-test',
-   nodeVersion: "0.12.10",
-   logs: __dirname + "/.logs/",
+   port: 3000,
+   nodeVersion: "4.2.0",
+
+   logs: __dirname + "/logs/",
    env: {
+      nodeVersion: "4.2.0",
       NODE_ENV: "production"
    }
 });
