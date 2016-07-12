@@ -77,17 +77,19 @@ var Forever = {
          return resolve();
       });
    },
-   checkPortAlive: function(port) {
+   checkPortAlive: function(opts) {
+      var port = opts.port;
+
       var self = this;
       logger.info("Waiting for alive port " + port);
-      var maxAttempts = 5;
+      var maxAttempts = opts.attempts || 5;
       var attempt = 0;
       return new Promise(function(resolve, reject) {
          var check = function() {
             logger.info("Checkig if port is alive - %s", attempt);
             if (attempt === maxAttempts) {
                return reject({
-                  message: "The app did not launch after %s attempt." + attempt
+                  message: "The app did not launch after " + attempt + " attempts"
                })
             }
 
@@ -158,6 +160,7 @@ var Forever = {
    daemon: function(file, opts) {
       var self = this;
       var name = opts.name;
+
       var env = opts.env || {};
       var nodeVersion = opts.nodeVersion;
       var config = getConfig(name);
@@ -179,7 +182,7 @@ var Forever = {
          return opts.port;
       }).then(function(port) {
          if (port) {
-            return self.checkPortAlive(port);
+            return self.checkPortAlive(opts);
          }
 
       }).then(function() {
