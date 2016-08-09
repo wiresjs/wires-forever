@@ -8,6 +8,7 @@ I got fed up with manual work, and created a simple and automated script that ca
 var Forever = require('wires-forever');
 
 Forever.daemon(__dirname + '/app.js', {
+   autostart: __filename, // will automatically generate auto start script (check logs)
    name: 'my-test',
    port : 3000, // recommended
    noveVersion : "0.12.0" // optional - "n" must be installed

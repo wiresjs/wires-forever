@@ -1,5 +1,6 @@
 var Forever = require('./index.js');
 Forever.daemon(__dirname + '/app.js', {
+   autostart: __filename,
    name: 'my-test',
    port: 3000,
    nodeVersion: "4.2.0",

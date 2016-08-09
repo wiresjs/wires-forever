@@ -8,16 +8,68 @@ var fs = require('fs')
 var moment = require('moment');
 var Promise = require('promise')
 
-function getUserHome() {
-   return process.env.HOME || process.env.USERPROFILE;
+const homeFolder = process.env.HOME || process.env.USERPROFILE;
+const configFolder = path.join(homeFolder, '.wires-forever');
+const pidsFolder = path.join(configFolder, 'pids');
+const autoStartConfigFile = path.join(configFolder, 'autostart.json');
+const autoStartScript = path.join(configFolder, 'start.sh');
+
+logger.info("Autostart config at %s", autoStartConfigFile);
+logger.info("Autostart bash script at %s", autoStartScript);
+mkdirp(configFolder);
+mkdirp(pidsFolder);
+
+const generateAutoStartScript = (obj) => {
+   var data = [];
+   for (var i in obj) {
+      var target = obj[i]
+      data.push('node ' + target)
+   }
+   var contents = data.join('&\n');
+   fs.writeFileSync(autoStartScript, contents)
 }
 
-var getConfig = function(name) {
-   var home = getUserHome();
-   var configFolder = path.join(home, '.daemons_pids');
-   mkdirp.sync(configFolder);
+const getConfig = (cfg) => {
+   var name = cfg.opts.name;
+   const autostart = cfg.opts.autostart;
+
+   mkdirp.sync(pidsFolder);
+
    var fname = name + ".pid";
-   var targetInfoFile = path.join(configFolder, fname)
+   var targetInfoFile = path.join(pidsFolder, fname)
+
+   if (autostart) {
+      // creating autostart file
+
+      if (!fs.existsSync(autoStartConfigFile)) {
+         logger.warn("Autostart initialized in %s", autoStartConfigFile)
+         fs.writeFileSync(autoStartConfigFile, '{}');
+      }
+
+      let rebuildConfig = false;
+      let autoStartConfig = JSON.parse(fs.readFileSync(autoStartConfigFile).toString());
+      if (!autoStartConfig[name]) {
+         logger.warn("Autostart - new record %s at %s", name, autostart)
+         autoStartConfig[name] = autostart;
+         rebuildConfig = true;
+      } else {
+         if (autoStartConfig[name] !== autostart) {
+            logger.warn("Autostart - path changed. Update autostart %s at %s", name, autostart)
+            autoStartConfig[name] = autostart;
+            rebuildConfig = true;
+         }
+      }
+      // Saving new configuration
+      if (rebuildConfig) {
+         logger.warn("New config installed for %s", name)
+         fs.writeFileSync(autoStartConfigFile, JSON.stringify(autoStartConfig, 2, 2));
+         logger.warn("Generaring new startup script %s", autoStartScript);
+         generateAutoStartScript(autoStartConfig);
+         // need to generate new startup script
+      } else {
+         logger.info("Autostart does not require changes");
+      }
+   }
 
    return {
       getPID: function() {
@@ -31,7 +83,7 @@ var getConfig = function(name) {
    }
 }
 
-var spawnProcess = function(pName, opts, logs, specialEnv) {
+const spawnProcess = (pName, opts, logs, specialEnv) => {
    var LOCAL_ENV = process.env;
    specialEnv = specialEnv || {};
    for (key in specialEnv) {
@@ -45,7 +97,7 @@ var spawnProcess = function(pName, opts, logs, specialEnv) {
    return ps;
 }
 
-var rotateLogs = function(out, err, folder) {
+const rotateLogs = (out, err, folder) => {
    folder = path.join(folder, "archive", moment().format('MMMM-Do-YYYY'));
    mkdirp.sync(folder);
 
@@ -62,7 +114,7 @@ var rotateLogs = function(out, err, folder) {
    }
 }
 
-var Forever = {
+const Forever = {
    path: 'forever',
    killByPid: function(pid) {
       return new Promise(function(resolve, reject) {
@@ -163,7 +215,11 @@ var Forever = {
 
       var env = opts.env || {};
       var nodeVersion = opts.nodeVersion;
-      var config = getConfig(name);
+      var config = getConfig({
+         file: file,
+         opts: opts
+      });
+
       return this.killApp(opts, config).then(function() {
          var logs = self.prepareLogs(opts);
          logger.info("Logs folder %s", logs.folder);
